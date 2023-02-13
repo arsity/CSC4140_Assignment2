@@ -8,8 +8,7 @@
 
 constexpr double MY_PI = 3.1415926;
 
-Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos)
-{
+Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos) {
     Eigen::Matrix4f view = Eigen::Matrix4f::Identity();
 
     Eigen::Matrix4f translate;
@@ -22,31 +21,70 @@ Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos)
     return view;
 }
 
-
-Eigen::Matrix4f get_model_matrix(float rotation_angle, Eigen::Vector3f T, Eigen::Vector3f S, Eigen::Vector3f P0, Eigen::Vector3f P1)
-{
+Eigen::Matrix4f get_model_matrix(float rotation_angle,
+                                 Eigen::Vector3f T,
+                                 Eigen::Vector3f S,
+                                 Eigen::Vector3f P0,
+                                 Eigen::Vector3f P1) {
 
     //Step 1: Build the Translation Matrix M_trans:
 
     //Step 2: Build the Scale Matrix S_trans:
 
     //Step 3: Implement Rodrigues' Rotation Formular, rotation by angle theta around axix u, then get the model matrix
-	// The axis u is determined by two points, u = P1-P0: Eigen::Vector3f P0 ,Eigen::Vector3f P1  
+    // The axis u is determined by two points, u = P1-P0: Eigen::Vector3f P0 ,Eigen::Vector3f P1
     // Create the model matrix for rotating the triangle around a given axis. // Hint: normalize axis first
 
-	//Step 4: Use Eigen's "AngleAxisf" to verify your Rotation
-	//Eigen::AngleAxisf rotation_vector(radian, Vector3f(axis[0], axis[1], axis[2]));  
-	//Eigen::Matrix3f rotation_matrix;
-	//rotation_m = rotation_vector.toRotationMatrix();
+    //Step 4: Use Eigen's "AngleAxisf" to verify your Rotation
+    //Eigen::AngleAxisf rotation_vector(radian, Vector3f(axis[0], axis[1], axis[2]));
+    //Eigen::Matrix3f rotation_matrix;
+    //rotation_m = rotation_vector.toRotationMatrix();
 
-	return model;
+    // Step 1 Implement
+    Eigen::Matrix4f M_trans = Eigen::Matrix4f::Identity();
+    for (int i = 0; i < 3; ++i) {
+        M_trans(i, 3) = T(i);
+    }
+
+    // Step 2 Implement
+    Eigen::Matrix4f S_trans = Eigen::Matrix4f::Identity();
+    for (int i = 0; i < 3; ++i) {
+        S_trans(i, i) = S(i);
+    }
+
+    // Step 3 Implement
+    Eigen::Vector3f u{P1 - P0};
+    u.normalize();
+    Eigen::Matrix3f lastMatrix = Eigen::Matrix3f::Zero();
+    lastMatrix(0, 1) = -u[2];
+    lastMatrix(1, 0) = u[2];
+    lastMatrix(0, 2) = u[1];
+    lastMatrix(2, 0) = -u[1];
+    lastMatrix(1, 2) = u[0];
+    lastMatrix(2, 1) = -u[0];
+
+    Eigen::Matrix3f
+        modelMatrix = cos(rotation_angle) * Eigen::Matrix3f::Identity()
+        + (1 - cos(rotation_angle)) * u * u.transpose()
+        + sin(rotation_angle) * lastMatrix;
+
+    Eigen::Matrix4f model_Matrix = Eigen::Matrix4f::Identity();
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            model_Matrix(i, j) = modelMatrix(i, j);
+        }
+    }
+
+    // Step 4 Implement
+    Eigen::AngleAxisf rotation_vector(rotation_angle, Vector3f(u[0], u[1], u[2]));
+    Eigen::Matrix3f rotation_matrix = rotation_vector.toRotationMatrix();
+    eigen_assert(rotation_matrix == modelMatrix);
+
+    return S_trans * model_Matrix * M_trans;
 }
 
-
-
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
-                                      float zNear, float zFar)
-{
+                                      float zNear, float zFar) {
     // Implement this function
 
 
@@ -62,11 +100,12 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
 
     // std::clog << "projection" << std::endl << projection << std::endl; //check
 
+
+
     return projection;
 }
 
-int main(int argc, const char** argv)
-{
+int main(int argc, const char** argv) {
     float angle = 0;
     bool command_line = false;
     std::string filename = "result.png";
@@ -76,8 +115,7 @@ int main(int argc, const char** argv)
         angle = std::stof(argv[2]); // -r by default
         if (argc == 4) {
             filename = std::string(argv[3]);
-        }
-        else
+        } else
             return 0;
     }
 
@@ -130,12 +168,10 @@ int main(int argc, const char** argv)
 
         std::cout << "frame count: " << frame_count++ << '\n';
         std::clog << "angle: " << angle << std::endl;
-    
 
         if (key == 'a') {
             angle += 10;
-        }
-        else if (key == 'd') {
+        } else if (key == 'd') {
             angle -= 10;
         }
     }
