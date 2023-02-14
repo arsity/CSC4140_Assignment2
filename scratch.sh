@@ -1,7 +1,6 @@
 #!/bin/bash
 
-mkdir "build" ||
-
+mkdir "build" || true
 
 cmake -DCMAKE_BUILD_TYPE=Release -B "build"
 cmake --build "build"
