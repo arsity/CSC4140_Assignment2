@@ -60,13 +60,13 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle,
     lastMatrix(1, 0) = u(2);
     lastMatrix(0, 2) = u(1);
     lastMatrix(2, 0) = -u(1);
-    lastMatrix(1, 2) = u(0);
-    lastMatrix(2, 1) = -u(0);
+    lastMatrix(1, 2) = -u(0);
+    lastMatrix(2, 1) = u(0);
 
     Eigen::Matrix3f
-        modelMatrix = cos(rotation_angle) * Eigen::Matrix3f::Identity()
-        + (1 - cos(rotation_angle)) * u * u.transpose()
-        + sin(rotation_angle) * lastMatrix;
+        modelMatrix = cos(rotation_angle * MY_PI / 180) * Eigen::Matrix3f::Identity()
+        + (1 - cos(rotation_angle * MY_PI / 180)) * u * u.transpose()
+        + sin(rotation_angle * MY_PI / 180) * lastMatrix;
 
     Eigen::Matrix4f model_Matrix = Eigen::Matrix4f::Identity();
     for (size_t i = 0; i < 3; ++i) {
@@ -76,9 +76,12 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle,
     }
 
     // Step 4 Implement
-    Eigen::AngleAxisf rotation_vector(rotation_angle, Vector3f(u(0), u(1), u(2)));
+    Eigen::AngleAxisf rotation_vector(rotation_angle * MY_PI / 180, u);
     Eigen::Matrix3f rotation_matrix = rotation_vector.toRotationMatrix();
-    eigen_assert(rotation_matrix == modelMatrix);
+
+    // check, no assert due to precision loss
+    std::cout << "Eigen Matrix:" << std::endl << rotation_matrix << std::endl;
+    std::cout << "My Matrix:" << std::endl << modelMatrix << std::endl;
 
     return S_trans * model_Matrix * M_trans;
 }
@@ -100,7 +103,6 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
     // Implement this function
 
 
-    // TODO: Implement this function
     // Create the projection matrix for the given parameters.
     // Then return it.
 
@@ -136,6 +138,8 @@ int main(int argc, const char** argv) {
     float angle = 0;
     bool command_line = false;
     std::string filename = "result.png";
+    size_t img_count = 0;
+    size_t buffer_count = 0;
 
     if (argc >= 3) {
         command_line = true;
@@ -187,7 +191,7 @@ int main(int argc, const char** argv) {
         r.set_projection(get_projection_matrix(eye_fov, aspect_ratio, zNear, zFar));
 
         r.draw(pos_id, ind_id, rst::Primitive::Triangle);
-        cv::Mat image(700, 700, CV_32FC3, r.frame_buffer().data());
+        cv::Mat image(1024, 1024, CV_32FC3, r.frame_buffer().data());
         image.convertTo(image, CV_8UC3, 1.0f);
 
         cv::imwrite(filename, image);
@@ -206,6 +210,11 @@ int main(int argc, const char** argv) {
         cv::Mat image(1024, 1024, CV_32FC3, r.frame_buffer().data());
         image.convertTo(image, CV_8UC3, 1.0f);
         cv::imshow("image", image);
+
+        if (img_count != buffer_count) {
+            cv::imwrite("../result_img/result_" + std::to_string(++buffer_count), image);
+        }
+
         key = cv::waitKey(10);
 
         std::cout << "frame count: " << frame_count++ << '\n';
@@ -213,8 +222,10 @@ int main(int argc, const char** argv) {
 
         if (key == 'a') {
             angle += 10;
+            img_count++;
         } else if (key == 'd') {
             angle -= 10;
+            img_count++;
         }
     }
 
