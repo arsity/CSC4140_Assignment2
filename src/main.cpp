@@ -138,8 +138,6 @@ int main(int argc, const char** argv) {
     float angle = 0;
     bool command_line = false;
     std::string filename = "result.png";
-    size_t img_count = 0;
-    size_t buffer_count = 0;
 
     if (argc >= 3) {
         command_line = true;
@@ -194,8 +192,6 @@ int main(int argc, const char** argv) {
         cv::Mat image(1024, 1024, CV_32FC3, r.frame_buffer().data());
         image.convertTo(image, CV_8UC3, 1.0f);
 
-        cv::imwrite(filename, image);
-
         return 0;
     }
 
@@ -211,10 +207,6 @@ int main(int argc, const char** argv) {
         image.convertTo(image, CV_8UC3, 1.0f);
         cv::imshow("image", image);
 
-        if (img_count != buffer_count) {
-            cv::imwrite("../result_img/result_" + std::to_string(++buffer_count), image);
-        }
-
         key = cv::waitKey(10);
 
         std::cout << "frame count: " << frame_count++ << '\n';
@@ -222,10 +214,8 @@ int main(int argc, const char** argv) {
 
         if (key == 'a') {
             angle += 10;
-            img_count++;
         } else if (key == 'd') {
             angle -= 10;
-            img_count++;
         }
     }
 
