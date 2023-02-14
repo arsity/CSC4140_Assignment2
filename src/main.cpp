@@ -145,9 +145,6 @@ int main(int argc, const char** argv) {
         if (argc == 4) {
             filename = std::string(argv[3]);
         } else {
-            std::cerr << "Invalid Argument!" << std::endl << std::endl;
-            std::cout << "Help:" << std::endl;
-            std::cout << "\t" << "[-r <degree> [<saving path>]]" << std::endl;
             return 0;
         }
     }
@@ -191,6 +188,8 @@ int main(int argc, const char** argv) {
         r.draw(pos_id, ind_id, rst::Primitive::Triangle);
         cv::Mat image(1024, 1024, CV_32FC3, r.frame_buffer().data());
         image.convertTo(image, CV_8UC3, 1.0f);
+
+        cv::imwrite(filename, image);
 
         return 0;
     }
