@@ -10,9 +10,9 @@ eye_fox -> 60
 
 aspect_ratio -> 1
 
-zNear -> 20
+zNear -> -20
 
-zFar -> 80
+zFar -> -80
 
 translation vector -> (0, 0, 0)
 
