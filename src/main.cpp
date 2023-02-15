@@ -168,8 +168,8 @@ int main(int argc, const char** argv) {
     // added parameters for get_projection_matrix(float eye_fov, float aspect_ratio,float zNear, float zFar)
     constexpr float eye_fov = 60; // use degree notation
     constexpr float aspect_ratio = 1; // use cubic
-    constexpr float zNear = 20;
-    constexpr float zFar = 80;
+    constexpr float zNear = -20;
+    constexpr float zFar = -80;
 
     Eigen::Vector3f T = Eigen::Vector3f::Zero();
     Eigen::Vector3f S = Eigen::Vector3f::Ones();
