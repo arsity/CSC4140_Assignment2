@@ -122,7 +122,7 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
     M_persp(2, 3) = -zNear * zFar;
 
     auto angle = eye_fov / 2 / 180 * MY_PI;
-    auto h = -zNear * tan(angle);
+    auto h = abs(zNear) * tan(angle);
     auto w = h * aspect_ratio;
     auto M_ortho = get_orthogonal_matrix(-w, w, -h, h, zNear, zFar);
 
